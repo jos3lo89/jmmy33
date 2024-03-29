@@ -201,4 +201,15 @@ router.put(
   }
 );
 
+router.post("/users/logout", authValidator, (req, res) => {
+  try {
+    res.clearCookie("token");
+    res.sendStatus(204);
+  } catch (error) {
+    console.log(error.message);
+
+    return res.status(500).json({ message: [error.message] });
+  }
+});
+
 export default router;

@@ -1,11 +1,14 @@
-<script setup> 
-
+<script setup>
+import { RouterView } from "vue-router";
+import MainLayout from "./layout/MainLayout.vue";
 </script>
 
 <template>
-  <h1>crud</h1>
+  <MainLayout>
+    <template v-slot:mainSlot>
+      <RouterView></RouterView>
+    </template>
+  </MainLayout>
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>
