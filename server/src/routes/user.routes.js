@@ -1,4 +1,5 @@
 import { Router } from "express";
+import * as fs from "node:fs/promises";
 import prisma from "../config/db.js";
 import bcrypt from "bcryptjs";
 import { v4 as uuid } from "uuid";
@@ -127,7 +128,10 @@ router.get("/users", authValidator, async (req, res) => {
 router.delete("/users/:id", authValidator, async (req, res) => {
   try {
     const { id } = req.params;
-    await prisma.users.delete({ where: { id } });
+
+    const userDelete = await prisma.users.delete({ where: { id } });
+
+    await fs.unlink(`./public${userDelete.foto}`);
 
     res.sendStatus(204);
   } catch (error) {
@@ -136,6 +140,65 @@ router.delete("/users/:id", authValidator, async (req, res) => {
   }
 });
 
-/* falta  [delete, update] */
+router.put(
+  "/users/:id",
+  userLoginValidator(userRegisterSchemaZ),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { nombre, apellido, email, clave } = req.body;
+
+      const claveHash = await bcrypt.hash(clave, 10);
+
+      const userUpdate = await prisma.users.update({
+        where: {
+          id,
+        },
+        data: {
+          nombre,
+          apellido,
+          email,
+          clave: claveHash,
+        },
+      });
+
+      res.status(200).json(userUpdate);
+    } catch (error) {
+      console.log(error.message);
+
+      return res.status(500).json({ message: [error.message] });
+    }
+  }
+);
+
+router.put(
+  "/users/foto/:id",
+  subirFoto,
+  userFotoValidator,
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      const userF = await prisma.users.findFirst({ where: { id } });
+
+      await fs.unlink(`./public${userF.foto}`);
+
+      const userUpdate = await prisma.users.update({
+        where: {
+          id,
+        },
+        data: {
+          foto: `/uploads/${req.file.filename}`,
+        },
+      });
+
+      res.status(200).json(userUpdate);
+    } catch (error) {
+      console.log(error.message);
+
+      return res.status(500).json({ message: [error.message] });
+    }
+  }
+);
 
 export default router;
