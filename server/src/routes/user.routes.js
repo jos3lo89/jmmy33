@@ -15,7 +15,7 @@ import {
   userLoginSchemaZ,
   userRegisterSchemaZ,
 } from "../schemas/userSchema.js";
-import { URL_SEVER } from "../config/config.js";
+import { URL_CLIENT, URL_SEVER } from "../config/config.js";
 import { createToken } from "../libs/jwt.js";
 import { authValidator } from "../middleware/authValidator.js";
 
@@ -208,6 +208,26 @@ router.post("/users/logout", authValidator, (req, res) => {
   } catch (error) {
     console.log(error.message);
 
+    return res.status(500).json({ message: [error.message] });
+  }
+});
+
+router.get("/users/:id", authValidator, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const row = await prisma.users.findFirst({ where: { id } });
+    res.status(200).json({
+      id: row.id,
+      nombre: row.nombre,
+      apellido: row.apellido,
+      email: row.email,
+      clave: row.clave,
+      foto: `${URL_SEVER}${row.foto}`,
+      isAdmin: row.isAdmin,
+    });
+  } catch (error) {
+    console.log(error.message);
     return res.status(500).json({ message: [error.message] });
   }
 });

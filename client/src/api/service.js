@@ -24,3 +24,18 @@ export const registerUser = async (data) => {
 export const deleteUser = async (id) => {
   return await axiosI.delete(`/users/${id}`);
 };
+
+// pedir usuario por id
+export const findUserById = async (id) => {
+  return await axiosI.get(`/users/${id}`);
+};
+
+// update user
+export const updateUser = async (id, data) => {
+  return await axiosI.put(`/users/${id}`, data);
+};
+
+// update Foto user
+export const updateFotoUser = async (id, data) => {
+  return await axiosI.put(`/users/foto/${id}`, data);
+};
